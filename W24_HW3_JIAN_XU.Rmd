@@ -1,0 +1,93 @@
+---
+output:
+  pdf_document: default
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+setwd("C:\\Users\\DELL\\Desktop\\CSC587\\datamining-main\\Rscripts")
+data.salary_status <- file.path('data', 'salary_status.xls')
+data <- read_excel(data.salary_status,sheet=1,na="NA")
+```
+
+```{r 1#}
+#1.(a)
+age <- c(13, 15, 16, 16, 19, 20, 20, 21, 22, 22, 25, 25, 25, 25, 30, 33, 33, 35, 35, 35, 35, 36, 40, 45, 46, 52,70)
+bin_means_smoothing <- function(data, bin_depth) {
+  smoothed_data <- numeric(length(data))
+  for (i in 1:length(data)) {
+    bin_index <- ceiling(i / bin_depth)
+    bin_start <- (bin_index - 1) * bin_depth + 1
+    bin_end <- min(bin_index * bin_depth, length(data))
+    if(bin_end>length(data)){
+      bin_end = length(data)
+    }
+    bin_mean <- mean(data[bin_start:bin_end])
+    smoothed_data[bin_start:bin_end] <- bin_mean
+  }
+  return(smoothed_data)
+}
+smoothed_age <- bin_means_smoothing(age, 3)
+print(smoothed_age)
+```
+
+```{r 1#}
+#1.(b)
+summary(age)
+fun.outlier <- function(x,time.iqr=1.5) {
+  print("IQR:")
+  print(IQR(x))
+  outlier.low <- quantile(x,probs=c(0.25))-IQR(x)*time.iqr
+  outlier.high <- quantile(x,probs=c(0.75))+IQR(x)*time.iqr
+  print("outliers:")
+  x[which(x>outlier.high | x<outlier.low)]
+}
+print(fun.outlier(age))
+```
+
+```{r 1#}
+#1.(c)
+# min-max
+min_max <- ((35 - min(age)) / (max(age) - min(age))) * (1.0 - 0.0) + 0.0
+print(min_max)
+```
+
+```{r 1#}
+#1.(d)
+# 
+mean_age <- mean(age)
+sd_age <- sd(age)
+z_score <- (35 - mean_age) / sd_age
+print(mean_age)
+print(sd_age)
+print(z_score)
+
+```
+
+```{r 1#}
+#1.(e)
+age_value <- 35
+# Find the appropriate power of 10
+power <- ceiling(log10(max(age)))
+# Perform decimal scaling normalization
+normalized_age <- age_value / (10 ^ power)
+# Print the normalized value
+print(normalized_age)
+```
+
+```{r 2#}
+#2. 
+foo <- function(data, min_new, max_new) {
+  min <- min(data)
+  max <- max(data)
+  normalized_min_max_data <- ((data - min) / (max - min)) * (max_new - min_new) + min_new
+  return(normalized_min_max_data)
+}
+
+normalized_min_max_age <- foo(age, 0, 1)
+print(normalized_min_max_age)
+```
